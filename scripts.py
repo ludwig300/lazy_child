@@ -13,9 +13,9 @@ from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 
 def get_schoolkid(name_child):
     try:
-        schoolkid = Schoolkid.objects.filter(
-            full_name__contains=name_child
-        ).get()
+        schoolkid = Schoolkid.objects.get(
+            full_name=name_child
+        )
     except MultipleObjectsReturned:
         return print('Найдено несколько совпадений')
     except ObjectDoesNotExist:
@@ -24,19 +24,19 @@ def get_schoolkid(name_child):
 
 
 def fix_marks(schoolkid):
-    bed_marks = Mark.objects.filter(schoolkid=schoolkid, points__lt=4)
-    for child_mark in bed_marks:
+    bad_marks = Mark.objects.filter(schoolkid=schoolkid, points__lt=4)
+    for child_mark in bad_marks:
         child_mark.points = 5
         child_mark.save()
 
 
 def remove_chastisements(schoolkid):
-    comment = Chastisement.objects.filter(schoolkid=schoolkid)
-    comment.delete()
+    comments = Chastisement.objects.filter(schoolkid=schoolkid)
+    comments.delete()
 
 
 def create_commendation(schoolkid, subject_title):
-    praise = [
+    praises = [
         'Молодец!',
         'Отлично!',
         'Хорошо!',
@@ -68,18 +68,18 @@ def create_commendation(schoolkid, subject_title):
         'Ты многое сделал, я это вижу!',
         'Теперь у тебя точно все получится!'
     ]
-    text = random.choice(praise)
+    text = random.choice(praises)
 
     try:
-        lesson = Lesson.objects.filter(
+        lesson = Lesson.objects.get(
             subject__title=subject_title,
             group_letter=schoolkid.group_letter,
             year_of_study=schoolkid.year_of_study
-        ).order_by('-date').get()
+        ).order_by('-date')
     except ObjectDoesNotExist:
         return print('Ошибка в названии предмета')
     except MultipleObjectsReturned:
-        lesson = Lesson.objects.filter(
+        lesson = Lesson.objects.get(
             subject__title=subject_title,
             group_letter=schoolkid.group_letter,
             year_of_study=schoolkid.year_of_study

@@ -24,10 +24,7 @@ def get_schoolkid(name_child):
 
 
 def fix_marks(schoolkid):
-    bad_marks = Mark.objects.filter(schoolkid=schoolkid, points__lt=4)
-    for child_mark in bad_marks:
-        child_mark.points = 5
-        child_mark.save()
+    Mark.objects.filter(schoolkid=schoolkid, points__lt=4).update(points=5)
 
 
 def remove_chastisements(schoolkid):
@@ -75,17 +72,17 @@ def create_commendation(schoolkid, subject_title):
             subject__title=subject_title,
             group_letter=schoolkid.group_letter,
             year_of_study=schoolkid.year_of_study
-        ).order_by('-date')
+        )
     except ObjectDoesNotExist:
         return print('Ошибка в названии предмета')
     except MultipleObjectsReturned:
-        lesson = Lesson.objects.get(
+        lesson = Lesson.objects.filter(
             subject__title=subject_title,
             group_letter=schoolkid.group_letter,
             year_of_study=schoolkid.year_of_study
-        ).order_by('-date').first()
+        ).order_by('date').first()
 
-    commendation = Commendation.objects.create(
+    Commendation.objects.create(
         text=text, created=lesson.date,
         schoolkid=schoolkid,
         subject=lesson.subject,
